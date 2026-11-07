@@ -1,0 +1,91 @@
+#!/usr/bin/make -f
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026 The Blueberry Pie OS Authors
+
+include /usr/share/pietoolchain/rules.mk
+include debian/tools.mk
+
+NOTICE := $(OBJ)/apsl-notice
+path_helper_LIBS += -Wl,-sectcreate,__TEXT,__source,$(NOTICE)
+systime_LIBS += -Wl,-sectcreate,__TEXT,__source,$(NOTICE)
+$(NOTICE):
+	@mkdir -p $(OBJ)
+	printf '%s\n' 'This program contains Covered Code under the Apple Public Source License 2.0.' \
+		'Its Source Code is available under that License from https://github.com/blueberrypieos/shell_cmds.' > $@
+
+locate.bigram_FLAGS += -I$(SRCROOT)/locate/locate
+locate.code_FLAGS += -I$(SRCROOT)/locate/locate
+
+S      := $(SRCROOT)
+HOSTCC := /usr/bin/cc
+CFLAGS := $(BASE_CFLAGS)
+
+all: $(OBJ)/bin/sh
+
+include $(PIETOOLCHAIN)/tools.mk
+$(OBJ)/bin/path_helper $(OBJ)/bin/systime: | $(NOTICE)
+all: $(TOOL_BINS)
+
+BUILTINS := bg cd command fc fg getopts hash jobs read type ulimit umask unalias wait
+
+SH_GEN  := $(OBJ)/sh/gen
+SH_SRCS := alias.c arith_yacc.c arith_yylex.c cd.c bltin/echo.c error.c eval.c exec.c \
+	expand.c histedit.c input.c jobs.c mail.c main.c memalloc.c miscbltin.c mystring.c \
+	options.c output.c parser.c redir.c show.c trap.c var.c
+SH_OBJS := $(patsubst %.c,$(OBJ)/sh/%.o,$(SH_SRCS)) $(OBJ)/sh/kill.o $(OBJ)/sh/printf.o \
+	$(OBJ)/sh/test.o $(OBJ)/sh/builtins.o $(OBJ)/sh/nodes.o $(OBJ)/sh/syntax.o
+SH_FLAGS := -DSHELL -I$(SH_GEN) -I$(S)/sh
+
+HOST_BSD := '-D__FBSDID(x)=' '-D__dead2=__attribute__((__noreturn__))' \
+	'-D__unused=__attribute__((__unused__))'
+SH_GENERATED := $(addprefix $(SH_GEN)/,builtins.c builtins.h nodes.c nodes.h syntax.c syntax.h token.h)
+$(SH_GEN)/.done: $(SH_GENERATED)
+	touch $@
+$(SH_GENERATED) &: $(addprefix $(S)/sh/,mkbuiltins mknodes.c nodetypes nodes.c.pat mksyntax.c mktokens)
+	rm -rf $(SH_GEN)
+	mkdir -p $(SH_GEN)
+	cd $(SH_GEN) && sed 's/`mktemp -t ka`/`mktemp`/' $(S)/sh/mkbuiltins | sh -s -- $(S)/sh
+	$(HOSTCC) $(HOST_BSD) -o $(SH_GEN)/mknodes $(S)/sh/mknodes.c
+	cd $(SH_GEN) && ./mknodes $(S)/sh/nodetypes $(S)/sh/nodes.c.pat
+	$(HOSTCC) $(HOST_BSD) -o $(SH_GEN)/mksyntax $(S)/sh/mksyntax.c
+	cd $(SH_GEN) && ./mksyntax
+	cd $(SH_GEN) && sed 's/`mktemp -t ka`/`mktemp`/' $(S)/sh/mktokens | sh -s
+
+$(OBJ)/sh/%.o: $(S)/sh/%.c $(SH_GEN)/.done
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(SH_FLAGS) -c $< -o $@
+$(OBJ)/sh/%.o: $(SH_GEN)/%.c $(SH_GEN)/.done
+	$(CC) $(CFLAGS) $(SH_FLAGS) -c $< -o $@
+$(OBJ)/sh/kill.o: $(S)/kill/kill.c $(SH_GEN)/.done
+	$(CC) $(CFLAGS) $(SH_FLAGS) -c $< -o $@
+$(OBJ)/sh/printf.o: $(S)/printf/printf.c $(SH_GEN)/.done
+	$(CC) $(CFLAGS) $(SH_FLAGS) -c $< -o $@
+$(OBJ)/sh/test.o: $(S)/test/test.c $(SH_GEN)/.done
+	$(CC) $(CFLAGS) $(SH_FLAGS) -c $< -o $@
+$(OBJ)/bin/sh: $(SH_OBJS)
+	@mkdir -p $(dir $@)
+	$(CC) $(BASE_LDFLAGS) $^ -ledit $(TOOLS_LDFLAGS) -o $@
+
+install: all install-tools
+	install -d $(ROOT)/bin
+	install -m 755 $(OBJ)/bin/sh $(ROOT)/bin/sh
+	ln -f $(ROOT)/usr/bin/hexdump $(ROOT)/usr/bin/od
+	ln -f $(ROOT)/usr/bin/id $(ROOT)/usr/bin/groups
+	ln -f $(ROOT)/usr/bin/id $(ROOT)/usr/bin/whoami
+	ln -f $(ROOT)/usr/bin/w $(ROOT)/usr/bin/uptime
+	ln -f $(ROOT)/bin/test $(ROOT)/bin/[
+	install -m 755 $(S)/alias/generic.sh $(ROOT)/usr/bin/alias
+	set -e; for b in $(BUILTINS); do \
+		ln -f $(ROOT)/usr/bin/alias $(ROOT)/usr/bin/$$b; done
+	install -d $(ROOT)/usr/libexec
+	install -m 755 $(S)/locate/locate/updatedb.sh $(ROOT)/usr/libexec/locate.updatedb
+	install -m 755 $(S)/locate/locate/concatdb.sh $(ROOT)/usr/libexec/locate.concatdb
+	install -m 755 $(S)/locate/locate/mklocatedb.sh $(ROOT)/usr/libexec/locate.mklocatedb
+	install -d $(ROOT)/etc/pam.d
+	install -m 444 debian/su.pam $(ROOT)/etc/pam.d/su
+	ln -sf basename.1 $(ROOT)/usr/share/man/man1/dirname.1
+	ln -sf test.1 $(ROOT)/usr/share/man/man1/[.1
+	ln -sf locate.code.8 $(ROOT)/usr/share/man/man8/locate.bigram.8
+
+
+.PHONY: all install

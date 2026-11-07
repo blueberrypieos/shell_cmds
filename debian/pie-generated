@@ -1,0 +1,11 @@
+debian/build/obj/expr/expr/expr.c
+debian/build/obj/expr/expr/expr.h
+debian/build/obj/find/find/getdate.c
+debian/build/obj/find/find/getdate.h
+debian/build/obj/sh/gen/builtins.c
+debian/build/obj/sh/gen/builtins.h
+debian/build/obj/sh/gen/nodes.c
+debian/build/obj/sh/gen/nodes.h
+debian/build/obj/sh/gen/syntax.c
+debian/build/obj/sh/gen/syntax.h
+debian/build/obj/sh/gen/token.h

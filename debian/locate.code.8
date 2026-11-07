@@ -1,0 +1,31 @@
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\" Copyright (c) 2026 The Blueberry Pie OS Authors
+.Dd November 7, 2026
+.Dt LOCATE.CODE 8
+.Os
+.Sh NAME
+.Nm locate.code ,
+.Nm locate.bigram
+.Nd build the locate database
+.Sh SYNOPSIS
+.Nm locate.bigram
+.Nm locate.code
+.Ar common_bigrams
+.Sh DESCRIPTION
+.Nm locate.bigram
+reads a sorted list of path names on standard input.
+For each name it counts the pairs of characters, two at a time, after the part it shares with the name before it.
+It writes each printable pair with its count on standard output.
+.Pp
+.Nm locate.code
+reads the same list on standard input.
+It writes the compressed database on standard output.
+It uses the most frequent pairs, read from the file
+.Ar common_bigrams .
+.Pp
+.Xr locate.updatedb 8
+runs both through
+.Pa /usr/libexec/locate.mklocatedb .
+.Sh SEE ALSO
+.Xr locate 1 ,
+.Xr locate.updatedb 8

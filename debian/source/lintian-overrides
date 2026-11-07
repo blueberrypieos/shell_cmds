@@ -1,0 +1,5 @@
+superfluous-file-pattern debian/build/obj/expr/expr/expr.c [debian/copyright:*]
+superfluous-file-pattern debian/build/obj/expr/expr/expr.h [debian/copyright:*]
+superfluous-file-pattern debian/build/obj/find/find/getdate.c [debian/copyright:*]
+superfluous-file-pattern debian/build/obj/find/find/getdate.h [debian/copyright:*]
+superfluous-file-pattern debian/build/obj/sh/gen/* [debian/copyright:*]
