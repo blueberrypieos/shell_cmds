@@ -13,7 +13,8 @@ Package: shell-cmds
 Architecture: darwin-arm64
 Essential: yes
 Priority: required
-Depends: libcxx, libedit, libresolv, libsbuf, libsystem, libutil, libxo, openpam
+Depends: libcxx, libedit, libresolv, libsbuf, libsystem, libutil, libxo, openpam,
+ pam-modules (>= 217.100.6+ds2-1)
 Description: sh and the basic shell commands
  FreeBSD's sh with history and line editing, and basic shell utilities
  including echo, test, env, find and xargs.

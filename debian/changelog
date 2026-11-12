@@ -1,3 +1,9 @@
+shell-cmds (329+ds1-2) blueberry-pie-os; urgency=medium
+
+  * su authenticates with pam_opendirectory.
+
+ -- Maxwell <maxwell@blueberrypieos.com>  Wed, 11 Nov 2026 00:08:43 +0000
+
 shell-cmds (329+ds1-1) blueberry-pie-os; urgency=medium
 
   * shell_cmds 329
