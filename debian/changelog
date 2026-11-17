@@ -1,3 +1,11 @@
+shell-cmds (329+ds1-3) blueberry-pie-os; urgency=medium
+
+  * Build-Depend on pietoolchain-host and pietoolchain-sdk.
+  * systime is in /usr/bin, so the package installs nothing under
+    /usr/local.
+
+ -- Maxwell <maxwell@blueberrypieos.com>  Mon, 16 Nov 2026 18:39:35 +0000
+
 shell-cmds (329+ds1-2) blueberry-pie-os; urgency=medium
 
   * su authenticates with pam_opendirectory.

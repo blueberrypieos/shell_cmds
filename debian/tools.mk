@@ -197,7 +197,7 @@ su_MANS := su/su.1:man1
 
 TOOLS += systime
 systime_SRCS := systime/systime.c
-systime_DIR := usr/local/bin
+systime_DIR := usr/bin
 
 TOOLS += tee
 tee_SRCS := tee/tee.c
